@@ -1,0 +1,101 @@
+Alan Grizzaffi
+11-785 Introduction to Deep Learning
+Homework 1 Part 2
+
+Description of Model:
+   I tested out a few different models, including the ResNet34, MobilenetV2, and EfficientNet, but essentially settled
+   on utilizing the ResNet34 model. I modified the structure slightly. I cut out the maxpool layer before the first layer
+   and then also modified the stride size to 1 for that first Conv2d layer. When testing out these changes, it seemed to
+   make the epochs run a little better. The model structure is shown below. The model structure and code was really helped
+   to visualize using the following link: https://towardsdatascience.com/understanding-and-visualizing-resnets-442284831be8
+
+   hidden_sizes = [64, 128, 256, 512]
+   ResNet(
+  (conv1): Conv2d(3, 64, kernel_size=(7, 7), stride=(2, 2), padding=(3, 3), bias=False)
+  (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (relu): ReLU(inplace=True)
+  (maxpool): MaxPool2d(kernel_size=3, stride=2, padding=1, dilation=1, ceil_mode=False)
+  (Layer_1):
+      3 ResNetBlocks(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+
+  (Layer_2):
+    (0): 1 ResNetBlock(
+      (conv1): Conv2d(64, 128, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(64, 128, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+
+      3 ResNetBlocks
+      (conv1): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(128, 128, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+
+  (Layer_3):
+    (0): 1 ResNetBlock(
+      (conv1): Conv2d(128, 256, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(128, 256, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+
+    5 ResNetBlocks (
+      (conv1): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(256, 256, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+
+  (Layer_4): Sequential(
+    (0): 1 ResNetBlock(
+      (conv1): Conv2d(256, 512, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential(
+        (0): Conv2d(256, 512, kernel_size=(1, 1), stride=(2, 2), bias=False)
+        (1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+
+     2 ResNetBlock(
+      (conv1): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (conv2): Conv2d(512, 512, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (shortcut): Sequential()
+
+  (linear_label): Linear(in_features=512, out_features=2300, bias=True)
+
+Experimentation:
+    I initially built an efficient net baseline model and could only tune hyperparameters to get it around 50% accuracy.
+    I then tried scaling the depth and width of the model, but could not get it over 60% accuracy with increasing the num_channels
+    and increasing the num_blocks as per the specified ratios. From that point on, I moved over to a ResNet34 model. I built the
+    standard ResNet34 model as per the visualizations from https://towardsdatascience.com/understanding-and-visualizing-resnets-442284831be8.
+    In order to obtain my best accuracy, of 66.08%, I ran 5 epochs at a lr = 0.001 which gave me 57% accuracy. Then I resumed
+    the model and rand 5 more epochs at a lr of 0.0005 and got up to 64.4% accuracy. Then, I ran another 5 epochs with a slow
+    degrading scheduler from the the 0.0005 mark and got my best accuracy of 66.08%. If I had more time I would have continued
+    modifying the lr and testing different models, but needed to work on verification. The only changes I made to the standard
+    ResNet34 model was to remove the maxpool layer and change the first Conv2d layer stride to 1 instead of 2.
+
+    For verification, I utilized the flattened output (closs_out = torch.flatten(out, -1)) as my embedding to compare across
+    different images. Unfortunately, I did not get this accuracy as high as I would have liked.
+
+Additional Comments:
+    I ran my model in AWS and the model should run smoothly as long as the 3 files (dataparser.py, hw2main.py, and myCNN.py)
+    are located in 11-785hw2p2-s20 folder.
+    To Run my Script: type in python3 hw2main.py
+    dataparser.py: Contains the Verification DataSet Parser/Loader.
+    hw2main.py: Contains all of the train, test, and verify functions to run everything.
+    myCNN.py: Contains the ResNet34 model.
+
+    Data preprocessing was minimal. Simply adding the RandomHorizontalFlip, ToTensor, and Normalize commands to the images.

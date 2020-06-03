@@ -1,0 +1,52 @@
+Alan Grizzaffi
+11-785 Introduction to Deep Learning
+Homework 3 Part 2
+
+Description of Model:
+   I tested out a few different models, including a 4 LSTM bidirectional model going from embedding to hidden size of 40 to 256
+   followed by a few MLP layers, that initially got me down to 10.75 in Lev score. I also tried a model with 3 conv layers
+   and 4 LSTM followed by 3 MLP layers, but didn't like the results so settled with the model below. I finalized my model as
+   2 layers of conv1d from 40 to 128, then 128 to 256, followed by 8 LSTM layers of size 256 to 256, followed by 4 MLP layers from
+   512 to 256, 256 to 128, 128 to 64, and 64 to 47 in order to descend gracefully upon the number of classes. Inbetween the conv
+   layers, I placed BN layers with a hardtanh activation, and then inbetween the MLP layers, I placed some dropout layers!
+
+MyModel(
+  (conv1): Conv1d(40, 128, kernel_size=(1,), stride=(1,))
+  (bn1): BatchNorm1d(128, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (conv2): Conv1d(128, 256, kernel_size=(1,), stride=(1,))
+  (bn2): BatchNorm1d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (tanh): Hardtanh(min_val=-1.0, max_val=1.0, inplace=True)
+  (lstm): LSTM(256, 256, num_layers=8, bidirectional=True)
+  (dropout): Dropout(p=0.2, inplace=False)
+  (linear1): Linear(in_features=512, out_features=256, bias=True)
+  (linear2): Linear(in_features=256, out_features=128, bias=True)
+  (linear3): Linear(in_features=128, out_features=64, bias=True)
+  (linear4): Linear(in_features=64, out_features=47, bias=True)
+)
+
+Experimentation:
+    I initially trained a 4 LSTM layer, 3 MLP layer model that got me around 10.75 on the Levenshtein distance score. Those
+    LSTM Layers were from 40 to 256 and then descending from 512 to 256, 256 to 128, and 128 to 47 on the MLP layers. I wasn't
+    happy with the way it was training then moved to a 3 conv1d layer model, with 4 LSTM and 3 MLPs. Once again, I was not
+    happy with the training as it was still only getting around 11.0 on the Lev score after 10-15 epochs, so I decided to compromise
+    and go with my final model as shown above. 2 conv1d layers of 40 to 128 and 128 to 256, followed by 8 LSTM layers of size
+    256 to 256, followed by 4 MLP layers of descending sizes 512 to 256, 256 to 128, 128 to 64, and 64 to 47. This model gave me
+    my best results of 9.14 on the public leaderboard through the following training methods:
+
+    learning rate initial: 1e-3
+    scheduler: every epoch, multiplied by a gamma value of 0.92
+    optimizer: torch.nn.CTCLoss()
+    total epochs: 27 epochs to acquire the best score on kaggle
+    batch size: 64 for 10 epochs
+             - After the first 10 epochs, I reduced the batch size to 32 due to memory issues and added more cache clearing in
+             my script
+
+Additional Comments:
+    I trained my model and generated my predictions all on Google Colab. I directly uploaded the portions of my code to
+    the jupyter notebook associated, but they still should be setup in a manner that would allow for direct running through
+    the following command if needed: python3 hw3main.py
+
+    Files:
+    1) hw3main.py - contains all of the necessary code to train, test, and generate predictions for the homework assignment
+    2) hw3model.py -contains my designed model that was trained and tested
+    3) hw3dataloader.py - contains my simple dataloaders and collate functions for training and testing

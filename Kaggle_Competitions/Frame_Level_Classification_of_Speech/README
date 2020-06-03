@@ -1,0 +1,48 @@
+Alan Grizzaffi
+11-785 Introduction to Deep Learning
+Homework 1 Part 2
+
+Description of Model:
+    input_size = (2 * context_length + 1) * 40 = 1000 with a context length of 12
+    hidden_sizes = either 500, 1000, 2000
+    output_size = 138
+
+    My model consists of 9 total layers structured similar to what the baseline model example portrayed (Descending).
+    Construction:
+    1) Linear Layer[input_size, 2000] ->BatchNorm[2000] -> ReLu Activation
+    2) Linear Layer[2000, 2000] ->BatchNorm[2000] -> ReLu Activation
+    3) Linear Layer[2000, 2000] ->BatchNorm[2000] -> ReLu Activation
+    4) Linear Layer[2000, 1000] ->BatchNorm[1000] -> ReLu Activation
+    5) Linear Layer[1000, 1000] ->BatchNorm[1000] -> ReLu Activation
+    6) Linear Layer[1000, 500] ->BatchNorm[500] -> ReLu Activation
+    7) Linear Layer[500, 500] ->BatchNorm[500] -> ReLu Activation
+    8) Linear Layer[500, output_size]
+    There are 7 hidden layers and they start large then eventually half in size as per my trials dictated. I followed
+    the structure from hw1p1 where the Batch Normalization Layer came before the non-linear transform. This
+    construction was determined from a trial and error basis.
+
+Experimentation:
+    Initially, I started with the Baseline model, and ran a small subset of the data through on my Mac to determine
+    what a relative training accuracy would be. I then started adding layers and repeating the process. I kept the
+    number of neurons similar to that explained in the baseline model creation. I would mess around with the number
+    of layers, and number of neurons in a "babysitting of the model" type method. Once I found a combination I liked,
+    I started tweaking some other hyper parameters as well. I left the learning rate low at around 2e-4, and
+    used the context length of 12 as referenced in a lot of piazza posts. I tried some different context lengths
+    of like 8 and 10 as well, but eventually stuck with 12 as the context size. For the batch size, I tried multiples
+    of 2 such as 32, 64, and 128 and found that the program seemed to run best with 64. These were the main parameters
+    I tweaked. My dataset loaders were structured similar to that of the recitation.
+
+Additional Comments:
+    For the mapping and pre-processing of the data, I decided to not zero pad and allow the data to essentially
+    mirror over the edge of the data if negative indices occurred. A mapping list was created using enumerate to store
+    an utterance number and the row indices (features). With this, the _getitem_ method given an index could easily
+    locate the utterance and then the index of the feature to begin with and range over (i - context_len, i + context_len + 1)
+    features.
+    Lastly, I actually ran my code using google Colab as I was experiencing a few issues with AWS (have been resolved).
+    I believe a few changes had to be made to get it running properly like changing:
+    device = torch.device("cuda:0" if cuda else "cpu") instead of "cuda" and then forcing me to add "allow_pickle = True"
+    when loading data with np.load().
+    To get the results shown on kaggle, I ran 15 epochs with a condition that if the previous accuracy was higher than the
+    new accuracy, the loop would break, then run the model for predictions. It went through 14 iterations (13th was best).
+    Each epoch takes a long time to run...
+    Run program by just using "python3 main_Colab.py" as long as data is in same folder.
